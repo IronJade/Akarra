@@ -1,0 +1,44 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: Infested Soils - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\DOCUME~1\jens\LOCALS~1\Temp\RSP14C.tmp" with contents
+[
+/nologo /MLd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /Fp"Debug/Infested Soils.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"D:\Jens\Projects\InfestedSoils\Infested Soils\RpgSystem\CCharacterAttributes.cpp"
+"D:\Jens\Projects\InfestedSoils\Infested Soils\RpgSystem\CSkill.cpp"
+"D:\Jens\Projects\InfestedSoils\Infested Soils\library\win32\WinMain.cpp"
+]
+Creating command line "cl.exe @C:\DOCUME~1\jens\LOCALS~1\Temp\RSP14C.tmp" 
+Creating temporary file "C:\DOCUME~1\jens\LOCALS~1\Temp\RSP14D.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /incremental:yes /pdb:"Debug/Infested Soils.pdb" /debug /machine:I386 /out:"../Output/Infested Soils.exe" /pdbtype:sept 
+".\Debug\CAttribute.obj"
+".\Debug\CCharacterAttributes.obj"
+".\Debug\CClass.obj"
+".\Debug\CDice.obj"
+".\Debug\CSkill.obj"
+".\Debug\basic.obj"
+".\Debug\CCharString.obj"
+".\Debug\CPoint.obj"
+".\Debug\CWideString.obj"
+".\Debug\CFileLibManager.obj"
+".\Debug\CFilePathManager.obj"
+".\Debug\CFileStream.obj"
+".\Debug\filesystem.obj"
+".\Debug\WinMain.obj"
+".\Debug\CArea.obj"
+]
+Creating command line "link.exe @C:\DOCUME~1\jens\LOCALS~1\Temp\RSP14D.tmp"
+<h3>Output Window</h3>
+Compiling...
+WinMain.cpp
+cl.exe terminated at user request.
+
+</pre>
+</body>
+</html>
