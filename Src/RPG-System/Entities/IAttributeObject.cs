@@ -137,5 +137,130 @@ namespace RpgSystem.Entities
         /// Determines if this object is ethereal.
         /// </summary>
         bool IsEthereal();
+
+                /// <summary>
+        /// Gets the value of an ability
+        /// </summary>
+        float GetAbility(Ability ability, int special = 0);
+        
+        /// <summary>
+        /// Applies harm to an attribute from an effect
+        /// </summary>
+        void HarmAttributeByEffect(float amount, int attribute, int attackerId, EffectType effect);
+        
+        /// <summary>
+        /// Restores an attribute from an effect
+        /// </summary>
+        void RestoreAttributeByEffect(float amount, int attribute, int casterId, EffectType effect);
+        
+        /// <summary>
+        /// Places an effect on this object
+        /// </summary>
+        void PlaceEffect(EffectType effect, IAttributeObject source, int identifier, int skillId = -1);
+        
+        /// <summary>
+        /// Gets the global ID of this object
+        /// </summary>
+        int GetIdNumber();
+        
+        /// <summary>
+        /// Gets the team this object belongs to
+        /// </summary>
+        int GetTeam();
+        
+        /// <summary>
+        /// Checks if this object is hostile to the given team
+        /// </summary>
+        bool IsHostile(int team);
+        
+        /// <summary>
+        /// Tests if this object meets a requirement
+        /// </summary>
+        bool TestRequirement(Requirement requirement);
+        
+        /// <summary>
+        /// Tests if this object has specific equipment in the given slot
+        /// </summary>
+        bool TestEquipSlot(int mainType, int subType);
+        
+        /// <summary>
+        /// Checks if this object can fly
+        /// </summary>
+        bool IsFlying();
+        
+        /// <summary>
+        /// Checks if this object is ethereal
+        /// </summary>
+        bool IsEthereal();
+        
+        /// <summary>
+        /// Gets the world coordinates of this object
+        /// </summary>
+        void GetCoordinates(out int x, out int y);
+        
+        /// <summary>
+        /// Gets the accuracy at a given distance
+        /// </summary>
+        float GetDistanceAccuracy(int distance);
+        
+        /// <summary>
+        /// Gets the chance for critical hits
+        /// </summary>
+        float GetCriticalValue();
+        
+        /// <summary>
+        /// Gets the chance for fumbles
+        /// </summary>
+        float GetFumbleValue();
+        
+        /// <summary>
+        /// Gets flags for attacking another object
+        /// </summary>
+        int GetAttackFlags(IAttributeObject target);
+        
+        /// <summary>
+        /// Deals damage to this object
+        /// </summary>
+        float DealDamage(float amount, int damageType, int hitType, int attackerId);
+        
+        /// <summary>
+        /// Checks if this object is alive
+        /// </summary>
+        bool IsAlive();
+        
+        /// <summary>
+        /// Checks if this object is hurt (not at full health)
+        /// </summary>
+        bool IsHurt();
+        
+        /// <summary>
+        /// Gets the current health value
+        /// </summary>
+        float GetHealth();
+        
+        /// <summary>
+        /// Gets the current value of a variable attribute
+        /// </summary>
+        float GetCurrentVar(VariableAttributeType varAttr);
+        
+        /// <summary>
+        /// Gets the maximum value of a variable attribute
+        /// </summary>
+        float GetMaxVar(VariableAttributeType varAttr);
+        
+        /// <summary>
+        /// Applies attack fatigue to this object
+        /// </summary>
+        void ApplyAttackFatigue(float multiplier, bool miss);
+        
+        /// <summary>
+        /// Applies defense fatigue to this object
+        /// </summary>
+        void ApplyDefenseFatigue(float multiplier, bool miss);
+        
+        /// <summary>
+        /// Notifies this object that a friend was attacked
+        /// </summary>
+        void FriendAttacked(int attackerId, bool forceSocial);
     }
 }
