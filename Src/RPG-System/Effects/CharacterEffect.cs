@@ -1,60 +1,31 @@
 using System;
 using System.IO;
-using RpgSystem.Effects;
-using RpgSystem.Entities;
 
-namespace RpgSystem.Character
+namespace RpgSystem.Effects
 {
     /// <summary>
-    /// A character effect is a temporary status effect applied to an entity
-    /// such as a buff, debuff, regeneration, poison, etc.
+    /// A character effect is a spell effect which has been placed on an entity
+    /// and needs to be updated regularly. Effects can be temporary buffs, debuffs,
+    /// regeneration, poison, etc.
     /// </summary>
     public class CharacterEffect
     {
-        // Effect identification
-        private int _identifier;           // Unique identifier for this effect instance
-        private int _skillSource;          // ID of skill that created this effect (-1 for no skill)
-        
-        // Effect data
-        private EffectType _effect;        // Reference to effect type
-        private string _effectName;        // Name of effect (for serialization)
-        
-        // Timing
-        private int _lifeTime;             // Remaining life time in milliseconds
-        private int _elapsedTime;          // Time counter in milliseconds
-        
-        // Source information
-        private int _attackerId;           // ID of entity that applied this effect
-        private float _sourceCastRating;   // Cast rating when effect was applied
-        
-        /// <summary>
-        /// Gets the ID of this effect instance
-        /// </summary>
+        // Fields
+        private int _attackerId;       // ID of the entity that caused this effect
+        private EffectType _effect;    // The effect definition
+        private string _effectName;    // Name of the effect (for serialization)
+        private int _lifeTime;         // Remaining time in milliseconds
+        private int _elapsedTime;      // Time counter in milliseconds
+        private int _skillSource;      // Source skill ID that created this effect
+        private float _sourceCastRating; // Cast rating when effect was applied
+        private int _identifier;       // Unique identifier for network transmission
+
+        // Properties
         public int Id => _identifier;
-        
-        /// <summary>
-        /// Gets the name of this effect
-        /// </summary>
         public string EffectName => _effectName;
-        
-        /// <summary>
-        /// Gets the cast rating used when this effect was applied
-        /// </summary>
         public float CastRating => _sourceCastRating;
-        
-        /// <summary>
-        /// Gets the entity ID of the effect source
-        /// </summary>
         public int SourceId => _attackerId;
-        
-        /// <summary>
-        /// Gets the remaining life time in milliseconds
-        /// </summary>
         public int RemainingLifeMillis => _lifeTime;
-        
-        /// <summary>
-        /// Gets the effect type
-        /// </summary>
         public EffectType Effect => _effect;
 
         /// <summary>
@@ -73,76 +44,51 @@ namespace RpgSystem.Character
         }
 
         /// <summary>
-        /// Reads effect data from a binary stream (for player character persistence)
+        /// Reads effect data from a binary stream (used for player characters)
         /// </summary>
         public bool Read(BinaryReader reader, int version)
         {
-            try
+            _effectName = new string(reader.ReadChars(32)).TrimEnd('\0');
+            _lifeTime = reader.ReadInt32();
+            _elapsedTime = reader.ReadInt32();
+
+            if (version > PlayerFileVersions.V_030301)
             {
-                // Read effect name (32 chars)
-                _effectName = new string(reader.ReadChars(32)).TrimEnd('\0');
-                
-                // Read timers
-                _lifeTime = reader.ReadInt32();
-                _elapsedTime = reader.ReadInt32();
-                
-                // Read other data if version supports it
-                if (version > PlayerFileVersions.V_030301)
-                {
-                    _identifier = reader.ReadInt32();
-                    _skillSource = reader.ReadInt32();
-                    _sourceCastRating = reader.ReadSingle();
-                }
-                
-                // These values are not saved (entity IDs are not persistent)
-                _attackerId = -1;
-                _effect = null;
-                
-                return true;
+                _identifier = reader.ReadInt32();
+                _skillSource = reader.ReadInt32();
+                _sourceCastRating = reader.ReadSingle();
             }
-            catch (Exception)
-            {
-                return false;
-            }
+
+            _attackerId = -1;
+            _effect = null;
+
+            return true;
         }
 
         /// <summary>
-        /// Writes effect data to a binary stream (for player character persistence)
+        /// Writes effect data to a binary stream (used for player characters)
         /// </summary>
         public bool Write(BinaryWriter writer)
         {
-            try
+            // Write effect name
+            char[] nameChars = new char[32];
+            for (int i = 0; i < Math.Min(_effectName.Length, 32); i++)
             {
-                // Write effect name (32 chars)
-                char[] nameChars = new char[32];
-                if (!string.IsNullOrEmpty(_effectName))
-                {
-                    for (int i = 0; i < Math.Min(_effectName.Length, 32); i++)
-                    {
-                        nameChars[i] = _effectName[i];
-                    }
-                }
-                writer.Write(nameChars);
-                
-                // Write timers
-                writer.Write(_lifeTime);
-                writer.Write(_elapsedTime);
-                
-                // Write other data
-                writer.Write(_identifier);
-                writer.Write(_skillSource);
-                writer.Write(_sourceCastRating);
-                
-                return true;
+                nameChars[i] = _effectName[i];
             }
-            catch (Exception)
-            {
-                return false;
-            }
+            writer.Write(nameChars);
+
+            writer.Write(_lifeTime);
+            writer.Write(_elapsedTime);
+            writer.Write(_identifier);
+            writer.Write(_skillSource);
+            writer.Write(_sourceCastRating);
+
+            return true;
         }
 
         /// <summary>
-        /// Gets the ID of this effect
+        /// Returns the ID of this effect
         /// </summary>
         public int GetId()
         {
@@ -150,9 +96,8 @@ namespace RpgSystem.Character
         }
 
         /// <summary>
-        /// Checks if this effect is overruled by a new effect with the same skill source
+        /// Checks if this effect is overruled by a new effect with the same skill ID
         /// </summary>
-        /// <param name="skill">Skill ID to check against</param>
         /// <returns>True if this effect should be removed</returns>
         public bool IsOverruled(int skill)
         {
@@ -166,7 +111,7 @@ namespace RpgSystem.Character
         {
             if (_effect == null)
                 return false;
-                
+
             switch (_effect.Type)
             {
                 case (int)EffectMechanismType.Boost:
@@ -189,7 +134,7 @@ namespace RpgSystem.Character
         {
             if (effect == null)
                 return;
-                
+
             _effect = effect;
             _effectName = effect.DataName;
         }
@@ -201,15 +146,15 @@ namespace RpgSystem.Character
         {
             _identifier = identifier;
             _skillSource = skill;
-            
+
             if (effect == null)
                 return;
-                
+
             SetEffect(effect);
-            
-            // Start the timer based on effect duration
+
+            // Set the timer based on effect duration
             _lifeTime = effect.GetDuration(0, source) * 1000;
-            
+
             _attackerId = -1;
             _sourceCastRating = 10.0f;
             
@@ -221,7 +166,7 @@ namespace RpgSystem.Character
         }
 
         /// <summary>
-        /// Updates the effect and applies its ongoing effects to the target
+        /// Processes the effect over time
         /// </summary>
         /// <param name="target">Target affected by this effect</param>
         /// <param name="deltaTime">Time elapsed in milliseconds</param>
@@ -230,16 +175,16 @@ namespace RpgSystem.Character
         {
             if (target == null || _effect == null)
                 return false;
-                
+
             // Decrease timer
             _lifeTime -= deltaTime;
-            
+
             if (_lifeTime <= 0)
                 return false;
-                
+
             _elapsedTime += deltaTime;
-            
-            // Process effect based on type
+
+            // Perform actions based on effect type
             switch (_effect.Type)
             {
                 case (int)EffectMechanismType.Poison:
@@ -247,17 +192,17 @@ namespace RpgSystem.Character
                     {
                         _elapsedTime -= 4000;
                         target.HarmAttributeByEffect(
-                            _effect.GetParameter(0, _sourceCastRating) * 4.0f,
-                            0,
-                            _attackerId,
+                            _effect.GetParameter(0, _sourceCastRating) * 4.0f, 
+                            0, 
+                            _attackerId, 
                             _effect);
                     }
                     break;
-                    
+
                 case (int)EffectMechanismType.Light:
-                    // Light effects are passive and don't need periodic updates
+                    // Light effects don't need periodic updates
                     break;
-                    
+
                 case (int)EffectMechanismType.Regenerate:
                     if (_elapsedTime >= 4000)  // Regeneration occurs every 4 seconds
                     {
@@ -270,8 +215,48 @@ namespace RpgSystem.Character
                     }
                     break;
             }
-            
+
             return true;
         }
+    }
+
+    /// <summary>
+    /// Types of effect mechanisms
+    /// </summary>
+    public enum EffectMechanismType
+    {
+        Unknown = 0,
+
+        Heal,           // [0 = hp, 1 = mp, 2 = sp], [min amount], [max amount]
+        Harm,           // [0 = hp, 1 = mp, 2 = sp], [min amount], [max amount]
+
+        CurePoison,     // [duration amount decreased]
+        Poison,         // [dmg/sec], [duration]
+
+        CureDisease,    // 
+        Disease,        // 
+
+        Boost,          // [0 = attr, 1 = abi, 2 = var], [amount], [duration]
+        Weaken,         // [0 = attr, 1 = abi, 2 = var], [amount], [duration]
+
+        Light,          // [strength], [duration], [non-zero if only affects target]
+        IdentifyItem,   // [max item level]
+
+        Summon,
+        Teleport,
+
+        Regenerate,     // [hp/mp/sp], [regain/sec], [duration]
+        Nightmare,      // [duration] (makes the character unable to rest)
+
+        TransparentDamage, // "transparent" damage booster on weapons
+
+        BoostPercent,   // same as Boost, but uses percentage instead
+        WeakenPercent,  // same as Weaken, but uses percentage instead
+
+        ImproveAttackSpeed, // increases attack speed [milliseconds], [duration]
+        ReduceAttackSpeed,  // decreases attack speed
+        SpeedPercent,       // modifies movement speed [+ multiplier], [duration]
+
+        RewardExperience     // adds [amount] experience to the target
     }
 }
