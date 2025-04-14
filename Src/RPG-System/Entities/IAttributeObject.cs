@@ -1,266 +1,186 @@
-using RpgSystem.Attributes;
-using RpgSystem.Combat;
+using System;
 using RpgSystem.Effects;
+using RpgSystem.Combat;
 
 namespace RpgSystem.Entities
 {
     /// <summary>
     /// Interface that defines an object that has attributes and abilities,
-    /// such as a player character or monster.
+    /// such as a player character, NPC, or monster.
     /// </summary>
     public interface IAttributeObject
     {
         /// <summary>
-        /// Gets the value of a specific ability.
+        /// Gets the value of a specific ability
         /// </summary>
         /// <param name="ability">The ability to retrieve</param>
-        /// <param name="special">Special calculation settings</param>
+        /// <param name="special">Special calculation settings (0=normal, 1=shield only, 2=armor only)</param>
         /// <returns>The ability value</returns>
-        float GetAbility(Ability ability, int special = 0);
-
-        /// <summary>
-        /// Applies damage to this object and returns the actual damage dealt.
-        /// </summary>
-        float DealDamage(float damage, int damageType, int hitType, int attackerId);
-
-        /// <summary>
-        /// Gets accuracy based on distance for ranged attacks.
-        /// </summary>
-        float GetDistanceAccuracy(float distance);
-
-        /// <summary>
-        /// Gets the chance for critical hits.
-        /// </summary>
-        float GetCriticalValue();
-
-        /// <summary>
-        /// Gets the chance for fumbles.
-        /// </summary>
-        float GetFumbleValue();
-
-        /// <summary>
-        /// Gets special attack flags for this attacker against the target.
-        /// </summary>
-        int GetAttackFlags(IAttributeObject target);
-
-        /// <summary>
-        /// Decreases the attacker's fatigue based on weapon being used.
-        /// </summary>
-        void AddAttackFatigue(float multiplier, bool miss);
-
-        /// <summary>
-        /// Decreases the target's fatigue based on armor being worn.
-        /// </summary>
-        void AddDefenseFatigue(float multiplier, bool miss);
-
-        /// <summary>
-        /// Determines if this object is alive and can fight.
-        /// </summary>
-        bool IsAlive();
-
-        /// <summary>
-        /// Determines if this object has taken damage.
-        /// </summary>
-        bool IsHurt();
-
-        /// <summary>
-        /// Gets the current health value.
-        /// </summary>
-        float GetHealth();
-
-        /// <summary>
-        /// Gets the current value of a variable attribute.
-        /// </summary>
-        float GetCurVar(int varAttribute);
-
-        /// <summary>
-        /// Gets the maximum value of a variable attribute.
-        /// </summary>
-        float GetMaxVar(int varAttribute);
-
-        /// <summary>
-        /// Called when a friend of this object is attacked.
-        /// </summary>
-        void FriendIsAttacked(int attackerId, bool forceSocial);
-
-        /// <summary>
-        /// Gets the coordinates of this object in the world.
-        /// </summary>
-        void GetCoordinates(out int x, out int y);
-
-        /// <summary>
-        /// Gets the unique ID number of this object.
-        /// </summary>
-        int GetIdNumber();
-
-        /// <summary>
-        /// Places an effect on this object.
-        /// </summary>
-        void PlaceEffect(EffectType effect, float castRating, int caster, int skillId);
-
-        /// <summary>
-        /// Restores an attribute by an effect (healing).
-        /// </summary>
-        void RestoreAttributeByEffect(float amount, int attribute, int caster, EffectType effect);
-
-        /// <summary>
-        /// Harms an attribute by an effect (damage).
-        /// </summary>
-        void HarmAttributeByEffect(float amount, int attribute, int attacker, EffectType effect);
-
-        /// <summary>
-        /// Gets the team this entity belongs to.
-        /// </summary>
-        int GetTeam();
-
-        /// <summary>
-        /// Determines if another team is hostile to this object.
-        /// </summary>
-        bool IsHostile(int team);
-
-        /// <summary>
-        /// Tests if this object meets a requirement.
-        /// </summary>
-        bool TestRequirement(Requirement req);
-
-        /// <summary>
-        /// Tests if this object has an equipment slot with a specific item type.
-        /// </summary>
-        bool TestEquipSlot(int slot, int itemSubtype);
-
-        /// <summary>
-        /// Determines if this object can fly.
-        /// </summary>
-        bool IsFlying();
-
-        /// <summary>
-        /// Determines if this object is ethereal.
-        /// </summary>
-        bool IsEthereal();
-
-                /// <summary>
-        /// Gets the value of an ability
-        /// </summary>
-        float GetAbility(Ability ability, int special = 0);
+        float GetAbility(Attributes.Ability ability, int special = 0);
         
         /// <summary>
-        /// Applies harm to an attribute from an effect
+        /// Applies damage to this object from another entity
         /// </summary>
+        /// <param name="damage">Amount of damage to apply</param>
+        /// <param name="damageType">Type of damage (physical, magical, etc.)</param>
+        /// <param name="hitType">Type of hit (normal, critical, etc.)</param>
+        /// <param name="attackerId">ID of the attacker</param>
+        /// <returns>Actual damage dealt after reductions</returns>
+        float DealDamage(float damage, int damageType, int hitType, int attackerId);
+        
+        /// <summary>
+        /// Applies harm to a specific attribute from an effect
+        /// </summary>
+        /// <param name="amount">Amount of harm to apply</param>
+        /// <param name="attribute">Attribute to harm (0=health, 1=mana, 2=stamina)</param>
+        /// <param name="attackerId">ID of the attacker</param>
+        /// <param name="effect">Effect causing the harm</param>
         void HarmAttributeByEffect(float amount, int attribute, int attackerId, EffectType effect);
         
         /// <summary>
-        /// Restores an attribute from an effect
+        /// Restores a specific attribute from an effect
         /// </summary>
+        /// <param name="amount">Amount to restore</param>
+        /// <param name="attribute">Attribute to restore (0=health, 1=mana, 2=stamina)</param>
+        /// <param name="casterId">ID of the caster</param>
+        /// <param name="effect">Effect causing the restoration</param>
         void RestoreAttributeByEffect(float amount, int attribute, int casterId, EffectType effect);
         
         /// <summary>
         /// Places an effect on this object
         /// </summary>
+        /// <param name="effect">Effect type to apply</param>
+        /// <param name="source">Source of the effect</param>
+        /// <param name="identifier">Unique ID for this effect instance</param>
+        /// <param name="skillId">ID of the skill that created this effect (-1 for no skill)</param>
         void PlaceEffect(EffectType effect, IAttributeObject source, int identifier, int skillId = -1);
         
         /// <summary>
-        /// Gets the global ID of this object
+        /// Gets the unique ID of this entity
         /// </summary>
         int GetIdNumber();
         
         /// <summary>
-        /// Gets the team this object belongs to
+        /// Gets the team this entity belongs to
         /// </summary>
         int GetTeam();
         
         /// <summary>
-        /// Checks if this object is hostile to the given team
+        /// Checks if another team is hostile to this entity
         /// </summary>
+        /// <param name="team">Team to check</param>
+        /// <returns>True if hostile, false if friendly</returns>
         bool IsHostile(int team);
         
         /// <summary>
-        /// Tests if this object meets a requirement
+        /// Tests if this entity meets a requirement
         /// </summary>
-        bool TestRequirement(Requirement requirement);
+        /// <param name="requirement">Requirement to test</param>
+        /// <returns>True if requirement is met, false otherwise</returns>
+        bool TestRequirement(Attributes.Requirement requirement);
         
         /// <summary>
-        /// Tests if this object has specific equipment in the given slot
+        /// Tests if this entity has a specific equipment type in a slot
         /// </summary>
+        /// <param name="mainType">Main type of equipment</param>
+        /// <param name="subType">Sub-type of equipment</param>
+        /// <returns>True if equipped, false otherwise</returns>
         bool TestEquipSlot(int mainType, int subType);
         
         /// <summary>
-        /// Checks if this object can fly
+        /// Checks if this entity can fly
         /// </summary>
         bool IsFlying();
         
         /// <summary>
-        /// Checks if this object is ethereal
+        /// Checks if this entity is ethereal (can pass through certain objects)
         /// </summary>
         bool IsEthereal();
         
         /// <summary>
-        /// Gets the world coordinates of this object
+        /// Gets the world coordinates of this entity
         /// </summary>
+        /// <param name="x">X coordinate output</param>
+        /// <param name="y">Y coordinate output</param>
         void GetCoordinates(out int x, out int y);
         
         /// <summary>
-        /// Gets the accuracy at a given distance
+        /// Gets the accuracy at a specific distance
         /// </summary>
+        /// <param name="distance">Distance in grid cells</param>
+        /// <returns>Accuracy as a percentage (0.0 to 1.0)</returns>
         float GetDistanceAccuracy(int distance);
         
         /// <summary>
         /// Gets the chance for critical hits
         /// </summary>
+        /// <returns>Critical hit chance as a percentage (0.0 to 1.0)</returns>
         float GetCriticalValue();
         
         /// <summary>
         /// Gets the chance for fumbles
         /// </summary>
+        /// <returns>Fumble chance as a percentage (0.0 to 1.0)</returns>
         float GetFumbleValue();
         
         /// <summary>
-        /// Gets flags for attacking another object
+        /// Gets special attack flags for attacking a specific target
         /// </summary>
+        /// <param name="target">Target being attacked</param>
+        /// <returns>Attack flags (bitfield)</returns>
         int GetAttackFlags(IAttributeObject target);
         
         /// <summary>
-        /// Deals damage to this object
+        /// Checks if this entity is alive
         /// </summary>
-        float DealDamage(float amount, int damageType, int hitType, int attackerId);
-        
-        /// <summary>
-        /// Checks if this object is alive
-        /// </summary>
+        /// <returns>True if alive, false if dead</returns>
         bool IsAlive();
         
         /// <summary>
-        /// Checks if this object is hurt (not at full health)
+        /// Checks if this entity is hurt (not at full health)
         /// </summary>
+        /// <returns>True if hurt, false if at full health</returns>
         bool IsHurt();
         
         /// <summary>
         /// Gets the current health value
         /// </summary>
+        /// <returns>Current health</returns>
         float GetHealth();
         
         /// <summary>
         /// Gets the current value of a variable attribute
         /// </summary>
-        float GetCurrentVar(VariableAttributeType varAttr);
+        /// <param name="varAttr">Variable attribute to get</param>
+        /// <returns>Current value of the attribute</returns>
+        float GetCurrentVar(Attributes.VariableAttributeType varAttr);
         
         /// <summary>
         /// Gets the maximum value of a variable attribute
         /// </summary>
-        float GetMaxVar(VariableAttributeType varAttr);
+        /// <param name="varAttr">Variable attribute to get</param>
+        /// <returns>Maximum value of the attribute</returns>
+        float GetMaxVar(Attributes.VariableAttributeType varAttr);
         
         /// <summary>
-        /// Applies attack fatigue to this object
+        /// Applies fatigue when attacking
         /// </summary>
+        /// <param name="multiplier">Stamina cost multiplier</param>
+        /// <param name="miss">True if the attack missed</param>
         void ApplyAttackFatigue(float multiplier, bool miss);
         
         /// <summary>
-        /// Applies defense fatigue to this object
+        /// Applies fatigue when defending
         /// </summary>
+        /// <param name="multiplier">Stamina cost multiplier</param>
+        /// <param name="miss">True if the attack missed</param>
         void ApplyDefenseFatigue(float multiplier, bool miss);
         
         /// <summary>
-        /// Notifies this object that a friend was attacked
+        /// Notifies this entity that a friend was attacked
         /// </summary>
+        /// <param name="attackerId">ID of the attacker</param>
+        /// <param name="forceSocial">True to force social response</param>
         void FriendAttacked(int attackerId, bool forceSocial);
     }
 }

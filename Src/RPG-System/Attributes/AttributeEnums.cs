@@ -1,78 +1,41 @@
+using System;
+
 namespace RpgSystem.Attributes
 {
     /// <summary>
-    /// Enumeration of base attributes in the game system.
+    /// Primary attributes that form the basis of a character or entity.
     /// </summary>
-    public enum BaseAttribute
+    public enum BaseAttributes
     {
-        Strength = 0,
-        Constitution,
-        Agility,
-        Intelligence,
-        Faith,
+        Strength = 0,        // Physical power, affects damage
+        Constitution,        // Physical resilience, affects health
+        Agility,             // Physical dexterity and speed, affects attack rating
+        Intelligence,        // Mental acuity, affects magic capability
+        Faith,               // Spiritual power, affects divine abilities
         
-        Count
+        Count                // Number of base attributes
     }
-
+    
     /// <summary>
-    /// Enumeration of variable attributes in the game system.
+    /// Variable attributes that fluctuate during gameplay.
+    /// These are resources consumed or replenished during gameplay.
     /// </summary>
-    public enum VariableAttributeType
+    public enum VarAttributes
     {
-        Health = 0,
-        Mana,
-        Stamina,
+        Health = 0,          // Physical wellbeing, reduced by damage
+        Mana,                // Magical energy, consumed by spells
+        Stamina,             // Physical energy, consumed by actions
         
-        Count
+        Count                // Number of variable attributes
     }
-
+    
     /// <summary>
-    /// Abilities are derived from attributes and used in various game calculations.
+    /// Utilities for working with base attributes and variable attributes
     /// </summary>
-    public enum Ability
+    public static class AttributeUtils
     {
-        // Combat Skills
-        AttackRating = 0,
-        CastRating,
-
-        // Damage
-        DamageMinimum,
-        DamageMaximum,
-
-        // Defense
-        ArmorClass,
-
-        // Resistances
-        ResistWhite,
-        ResistRed,
-        ResistGreen,
-        ResistBlue,
-        ResistYellow,
-
-        // Secondary defense
-        DamageReduction,
-
-        Count
-    }
-
-    /// <summary>
-    /// Special settings for ability calculations.
-    /// </summary>
-    public enum GetAbilitySettings
-    {
-        None = 0,
-        ShieldOnly,   // Used when we only want the armor class for the shield
-        ArmorOnly,    // Same, but for armor (ignores shield and agility bonus)
-        
-        Count
-    }
-
-    /// <summary>
-    /// Static helper class for attribute-related functions.
-    /// </summary>
-    public static class AttributeHelper
-    {
-        private static readonly string[] AttributeNames = new string[]
+        // Name lookup tables for attributes
+        private static readonly string[] BaseAttributeNames = new string[]
         {
             "Strength",
             "Constitution",
@@ -80,51 +43,110 @@ namespace RpgSystem.Attributes
             "Intelligence",
             "Faith"
         };
-
-        private static readonly string[] VariableAttributeNames = new string[]
+        
+        private static readonly string[] VarAttributeNames = new string[]
         {
             "Health",
             "Mana",
             "Stamina"
         };
-
-        private static readonly string[] AbilityNames = new string[]
-        {
-            "Attack Rating",
-            "Cast Rating",
-            "Minimum Damage",
-            "Maximum Damage",
-            "Armor Class",
-            "Resist White",
-            "Resist Red",
-            "Resist Green",
-            "Resist Blue",
-            "Resist Yellow",
-            "Damage Reduction"
-        };
-
+        
         /// <summary>
-        /// Gets the name of a base attribute.
+        /// Gets the name of a base attribute
         /// </summary>
-        public static string GetAttributeName(BaseAttribute attribute)
+        /// <param name="attribute">The attribute index</param>
+        /// <returns>Name of the attribute</returns>
+        public static string GetBaseAttributeName(int attribute)
         {
-            return AttributeNames[(int)attribute];
+            if (attribute < 0 || attribute >= (int)BaseAttributes.Count)
+            {
+                return "Unknown Attribute";
+            }
+            
+            return BaseAttributeNames[attribute];
         }
-
+        
         /// <summary>
-        /// Gets the name of a variable attribute.
+        /// Gets the name of a base attribute
         /// </summary>
-        public static string GetVariableAttributeName(VariableAttributeType attribute)
+        /// <param name="attribute">The attribute enum value</param>
+        /// <returns>Name of the attribute</returns>
+        public static string GetBaseAttributeName(BaseAttributes attribute)
         {
-            return VariableAttributeNames[(int)attribute];
+            return GetBaseAttributeName((int)attribute);
         }
-
+        
         /// <summary>
-        /// Gets the name of an ability.
+        /// Gets the name of a variable attribute
         /// </summary>
-        public static string GetAbilityName(Ability ability)
+        /// <param name="attribute">The attribute index</param>
+        /// <returns>Name of the attribute</returns>
+        public static string GetVarAttributeName(int attribute)
         {
-            return AbilityNames[(int)ability];
+            if (attribute < 0 || attribute >= (int)VarAttributes.Count)
+            {
+                return "Unknown Variable";
+            }
+            
+            return VarAttributeNames[attribute];
+        }
+        
+        /// <summary>
+        /// Gets the name of a variable attribute
+        /// </summary>
+        /// <param name="attribute">The attribute enum value</param>
+        /// <returns>Name of the attribute</returns>
+        public static string GetVarAttributeName(VarAttributes attribute)
+        {
+            return GetVarAttributeName((int)attribute);
+        }
+        
+        /// <summary>
+        /// Gets the default starting value for a base attribute based on race
+        /// </summary>
+        /// <param name="attribute">The attribute</param>
+        /// <param name="race">Character race (0=Human, 1=Menit, 2=Iwid)</param>
+        /// <returns>Default starting value</returns>
+        public static float GetStartingValue(BaseAttributes attribute, int race)
+        {
+            // Starting attribute values by race
+            float[,] startingValues = new float[,]
+            {
+                // Human
+                { 15.0f, 15.0f, 15.0f, 15.0f, 15.0f },
+                // Menit
+                { 23.0f, 21.0f, 18.0f, 18.0f, 20.0f },
+                // Iwid
+                { 18.0f, 18.0f, 21.0f, 23.0f, 20.0f }
+            };
+            
+            if (race < 0 || race > 2 || (int)attribute < 0 || (int)attribute >= (int)BaseAttributes.Count)
+            {
+                return 15.0f; // Default value
+            }
+            
+            return startingValues[race, (int)attribute];
+        }
+        
+        /// <summary>
+        /// Calculates the attribute points required for the next level based on current level
+        /// </summary>
+        /// <param name="level">Current character level</param>
+        /// <returns>Attribute points gained per level</returns>
+        public static int GetPointsPerLevel(int level)
+        {
+            if (level < 100)
+            {
+                return 5; // 5 points per level up to level 100
+            }
+            else if (level < 125)
+            {
+                return 3; // 3 points per level from 100-124
+            }
+            else
+            {
+                return 0; // No more attribute points after level 125
+            }
         }
     }
 }
